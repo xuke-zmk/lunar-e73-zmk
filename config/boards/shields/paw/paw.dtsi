@@ -30,25 +30,25 @@
 
         diode-direction = "row2col";
                 row-gpios
-                        = <&gpio0 31 GPIO_ACTIVE_HIGH>
+                        = <&gpio0 2 GPIO_ACTIVE_HIGH>
                         , <&gpio0 29 GPIO_ACTIVE_HIGH>
-                        , <&gpio0 2 GPIO_ACTIVE_HIGH>
-                        , <&gpio1 15 GPIO_ACTIVE_HIGH>
+                        , <&gpio0 31 GPIO_ACTIVE_HIGH>
+                        , <&gpio0 30 GPIO_ACTIVE_HIGH>
             ;
     };
 
         left_encoder: encoder_left {
                                         compatible = "alps,ec11";
-                                        a-gpios = <&gpio0 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
-                                        b-gpios = <&gpio0 8 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+                                        a-gpios = <&gpio1 9 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+                                        b-gpios = <&gpio1 8 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
                                         status = "disabled";
                                         steps = <30>;
          };
 
         right_encoder: encoder_right {
                                         compatible = "alps,ec11";
-                                        a-gpios = <&gpio0 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
-                                        b-gpios = <&gpio0 8 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+                                        a-gpios = <&gpio1 9 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+                                        b-gpios = <&gpio1 8 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
                                         status = "disabled";
                                         steps = <30>;
          };
@@ -83,20 +83,3 @@
         status = "disabled";
     };
 };
-
-
-// nice_view_spi: &spi2 {
-//               status ="okay";
-//     compatible = "nordic,nrf-spim";
-//     pinctrl-0 = <&spi2_default>;
-//     pinctrl-1 = <&spi2_sleep>;
-//     pinctrl-names = "default", "sleep";
-//     cs-gpios = <&gpio0 24 GPIO_ACTIVE_LOW>;
-//              trackball: trackball@0 {
-//                      status = "okay";
-//                      compatible ="pixart,paw3222";
-//                      reg = <0>;
-//                      spi-max-frequency = <200000>;
-//                      irq-gpios = <&gpio0 29 GPIO_ACTIVE_LOW>;
-//      };
-// };
