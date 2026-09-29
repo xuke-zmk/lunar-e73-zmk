@@ -19,7 +19,7 @@
 
 &kscan0 {
     col-gpios
-            = <&gpio1 06 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            = <&gpio0 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
             , <&gpio1 13 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
             , <&gpio0 28 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
             , <&gpio0 03 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
