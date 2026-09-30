@@ -2,17 +2,11 @@ manifest:
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
-    - name: elekit-official
-      url-base: https://github.com/elekit-official
 
   projects:
     - name: zmk
       remote: zmkfirmware
       revision: v0.3
       import: app/west.yml
-    - name: zmk_encoder
-      remote: elekit-official
-      revision: main
-      path: modules/zmk_encoder
   self:
     path: config
