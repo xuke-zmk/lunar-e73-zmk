@@ -1,9 +1,9 @@
 # This file generates the GitHub Actions matrix
 include:
-  - board: nrfmicro/nrf52840/zmk//zmk
+  - board: nrfmicro/nrf52840
     shield: paw_left
     snippet: studio-rpc-usb-uart
     snippet: nrf52840-nosd
-  - board: nrfmicro/nrf52840/zmk//zmk
+  - board: nrfmicro/nrf52840
     shield: paw_right
     snippet: nrf52840-nosd
