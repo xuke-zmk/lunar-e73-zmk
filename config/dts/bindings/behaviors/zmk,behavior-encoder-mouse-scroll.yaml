@@ -1,0 +1,5 @@
+description: Encoder Mouse Scroll Behavior
+
+compatible: "zmk,behavior-encoder-mouse-scroll"
+
+include: zero_param.yaml
