@@ -15,9 +15,9 @@ manifest:
     - name: zmk-driver-paw3222
       remote: sekigon-gonnoc
       revision: main
-    - name: zmk-config
+    - name: zmk_encoder
       remote: xuke-zmk
       revision: main
-      path: config
+      path: modules/zmk_encoder
   self:
     path: config
