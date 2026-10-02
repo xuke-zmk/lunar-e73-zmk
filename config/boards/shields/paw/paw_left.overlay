@@ -7,6 +7,26 @@
 #include "paw.dtsi"
 #include <dt-bindings/led/led.h>
 
+/* ---- DYA Studio: Runtime Input Processor 的 include ------------------------
+ * 这三行必须放在 `#include "paw.dtsi"` **之后**，不能挪到 paw.dtsi 顶部。
+ *
+ * 因为 <input/processors/runtime-input-processor.dtsi> 会
+ *   #include <dt-bindings/zmk/keys.h>  -> modifiers.h -> #define RC(keycode)
+ * 而 paw.dtsi 里的矩阵表用的是
+ *   dt-bindings/zmk/matrix_transform.h -> #define RC(row, col)
+ * 两个 RC 同名。上面那行 include 会先把 paw.dtsi 整个处理完（矩阵表已经展开成
+ * 数字），之后 keys.h 再来重定义 RC 就没影响了。
+ *
+ * 反过来（放 paw.dtsi 顶部）会直接编译失败：
+ *   error: macro "RC" passed 2 arguments, but takes just 1
+ * —— 2026-10-02 那次 CI 就是栽在这里。
+ *
+ * 文件里后面那些节点都不再用矩阵的 RC(...)，所以是安全的。
+ */
+#include <dt-bindings/input/input-event-codes.h>
+#include <input/processors.dtsi>
+#include <input/processors/runtime-input-processor.dtsi>
+
 / { chosen {
         zmk,underglow = &led_strip;
     };

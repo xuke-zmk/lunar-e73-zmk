@@ -7,21 +7,30 @@
  * 说明: https://studio.dya.cormoran.works/developer-guide/modules/trackball
  *       https://github.com/cormoran/zmk-module-runtime-input-processor
  *
- * <input/processors/runtime-input-processor.dtsi> 会定义两个默认节点：
- *   - mouse_runtime_input_processor   （指针：灵敏度 / 旋转 / 轴反转 / 惯量）
- *   - scroll_runtime_input_processor  （滚动）
- * 这两个节点是 /omit-if-no-ref/ 的：没人引用就会被整个丢掉。
+ * !! 三行 input-processor 的 #include 刻意**没有**放在这里，而是放在
+ *    paw_left.overlay 里 `#include "paw.dtsi"` 之后。原因是一个很坑的宏冲突：
  *
- * 注意挂载位置：input-processors 只写在**中央侧（左半）**的 listener 上，
- * 见 paw_left.overlay。原因是本键盘右半的轨迹球是通过
+ *      dt-bindings/zmk/matrix_transform.h -> #define RC(row, col)  ← 矩阵位置
+ *      dt-bindings/zmk/modifiers.h        -> #define RC(keycode)   ← 右 Ctrl
+ *
+ *    <input/processors/runtime-input-processor.dtsi> 会 #include
+ *    <dt-bindings/zmk/keys.h>，而 keys.h 又 include modifiers.h。
+ *    如果把这三行放在本文件顶部，它们会**先于**下面的
+ *      map = <RC(0,0) RC(0,1) ...>
+ *    被展开，于是 RC 变成了「只收 1 个参数」的右 Ctrl，编译直接报
+ *      error: macro "RC" passed 2 arguments, but takes just 1
+ *    （这就是 2026-10-02 那次 CI 失败的原因。）
+ *
+ *    原来的仓库之所以没事，是因为 keymap 里 include keys.h 的动作发生在
+ *    shield overlay **之后**——纯属顺序巧合。所以这个 include 的位置不能动。
+ *
+ * 另外：input-processors 只写在**中央侧（左半）**，见 paw_left.overlay。
+ * 原因是本键盘右半的轨迹球是通过
  *   &pmw_split { device = <&trackball>; }
  * 被直接转发到中央侧的，**绕过了 input-listener**；而外周侧自己没有 HID 输出，
  * 所以在右半的 listener 上挂 processor 对外发路径不起作用，只会白占 RAM
  * 并可能让两半出现同名 processor-label。
  */
-#include <dt-bindings/input/input-event-codes.h>
-#include <input/processors.dtsi>
-#include <input/processors/runtime-input-processor.dtsi>
 
 / {
     chosen {
