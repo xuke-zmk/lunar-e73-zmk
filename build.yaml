@@ -3,6 +3,7 @@ include:
   - board: nice_nano//zmk
     shield: paw_left
     snippet: studio-rpc-usb-uart
+    snippet: zmk-usb-logging
     snippet: nrf52840-nosd
   - board: nice_nano//zmk
     shield: paw_right
