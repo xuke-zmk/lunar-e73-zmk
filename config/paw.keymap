@@ -11,17 +11,6 @@
 #include <dt-bindings/zmk/outputs.h>
 
 / {
-    behaviors {
-        ec_msc_l: ec_msc_l {
-            compatible = "zmk,behavior-encoder-mouse-scroll";
-            #sensor-binding-cells = <2>;
-        };
-        ec_msc_r: ec_msc_r {
-            compatible = "zmk,behavior-encoder-mouse-scroll";
-            #sensor-binding-cells = <2>;
-        };
-    };
-
     keymap {
         compatible = "zmk,keymap";
 
