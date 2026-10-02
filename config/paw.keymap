@@ -36,15 +36,15 @@
             >;
 
             sensor-bindings =
-                <&ec_msc_l SCRL_LEFT SCRL_RIGHT>,
-                <&ec_msc_r SCRL_DOWN SCRL_UP>;
+                <&inc_dec_kp C_VOL_UP C_VOL_DN>,
+                <&inc_dec_kp PG_UP PG_DN>;
         };
 
         lower_layer {
             display-name = "Lower Layer";
 
             bindings = <
-&kp TAB     &kp N1        &kp N2        &kp N3        &kp N4        &kp N5            &kp N6    &kp N7    &kp N8    &kp N9     &kp N0  &kp BSPC
+&studio_unlock  &kp N1        &kp N2        &kp N3        &kp N4        &kp N5            &kp N6    &kp N7    &kp N8    &kp N9     &kp N0  &kp BSPC
 &bt BT_CLR  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4      &kp LEFT  &kp DOWN  &kp UP    &kp RIGHT  &trans  &trans
 &kp LSHFT   &trans        &trans        &trans        &trans        &trans            &trans    &trans    &trans    &trans     &trans  &trans
                           &kp LGUI      &kp LGUI      &trans        &kp SPACE         &kp RET   &trans    &kp RALT  &kp LGUI
