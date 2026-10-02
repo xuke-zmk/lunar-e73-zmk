@@ -2,15 +2,38 @@
 #include <physical_layouts.dtsi>
 #include "paw-layouts.dtsi"
 
+/* ---- DYA Studio: Runtime Input Processor (Trackball 标签页) ----------------
+ * 参考实现: cormoran/zmk-keyboard-dya2 的 boards/shields/dya2/dya2.dtsi
+ * 说明: https://studio.dya.cormoran.works/developer-guide/modules/trackball
+ *       https://github.com/cormoran/zmk-module-runtime-input-processor
+ *
+ * <input/processors/runtime-input-processor.dtsi> 会定义两个默认节点：
+ *   - mouse_runtime_input_processor   （指针：灵敏度 / 旋转 / 轴反转 / 惯量）
+ *   - scroll_runtime_input_processor  （滚动）
+ * 这两个节点是 /omit-if-no-ref/ 的：没人引用就会被整个丢掉。
+ *
+ * 注意挂载位置：input-processors 只写在**中央侧（左半）**的 listener 上，
+ * 见 paw_left.overlay。原因是本键盘右半的轨迹球是通过
+ *   &pmw_split { device = <&trackball>; }
+ * 被直接转发到中央侧的，**绕过了 input-listener**；而外周侧自己没有 HID 输出，
+ * 所以在右半的 listener 上挂 processor 对外发路径不起作用，只会白占 RAM
+ * 并可能让两半出现同名 processor-label。
+ */
+#include <dt-bindings/input/input-event-codes.h>
+#include <input/processors.dtsi>
+#include <input/processors/runtime-input-processor.dtsi>
+
 / {
     chosen {
         zmk,physical-layout = &physical_layout0;
     };
 
-                trackball_listener: trackball_listener {
-                                        compatible = "zmk,input-listener";
-                                        device = <&trackball>;
-                };
+    trackball_listener: trackball_listener {
+        compatible = "zmk,input-listener";
+        device = <&trackball>;
+        /* input-processors 只在中央侧（paw_left.overlay）挂，原因见文件头注释 */
+    };
+
     matrix_transform0:  keymap_transform_0 {
         compatible = "zmk,matrix-transform";
         columns = <12>;

@@ -5,7 +5,12 @@ on:
     paths:
       - config/**
       - build.yaml
+      - .github/workflows/build.yml
 
 jobs:
   build:
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main
+    # 相对原始文件只改了这里：zmkfirmware/zmk@main -> cormoran/zmk@main+dya
+    # 这个可复用工作流本身是通用的（west init -l config / west update / west build），
+    # 真正决定用哪个 ZMK fork 的是 config/west.yml，但工作流也必须指向同一个 fork，
+    # 否则容器内的 Zephyr/west 版本与 fork 期望的不一致。
+    uses: cormoran/zmk/.github/workflows/build-user-config.yml@main+dya

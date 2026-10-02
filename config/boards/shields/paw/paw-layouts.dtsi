@@ -54,3 +54,62 @@ keys  //                     w   h    x    y     rot    rx    ry
             ;
 			};
 };
+
+/* ===========================================================================
+ * DYA Studio: 键盘图上画出非按键部件 (Physical Layout 扩展)
+ * 参考: https://studio.dya.cormoran.works/developer-guide/modules/keymap
+ *       https://github.com/cormoran/zmk-feature-module-physical-layout
+ *       cormoran/zmk-keyboard-dya2 的 dya2.dtsi 里 trackball_layout 节点
+ *
+ * 坐标单位与上面的 &key_physical_attrs 完全一致（一个按键 = 100）。
+ * 下面这些 x / y 是我按常见布局估的位置，画出来偏了就直接改数值，
+ * 不影响固件功能（纯 UI 显示）。
+ * ===========================================================================
+ */
+/ {
+    /* 左半（中央侧）自己的轨迹球：指向本半的 mouse processor */
+    trackball_layout_left: trackball_layout_left {
+        compatible = "cormoran,physical-layout-trackball";
+        display-name = "Trackball (L)";
+        size = <150>;
+        x = <160>;
+        y = <430>;
+        linked-device-identifiers = "mouse";
+        linked-subsystems = "cormoran_rip";
+    };
+
+    /* 右半（外周侧）的轨迹球：它的事件经 split 传到中央侧，
+     * 由 pmw_listener 上的 tsplit processor 处理 */
+    trackball_layout_right: trackball_layout_right {
+        compatible = "cormoran,physical-layout-trackball";
+        display-name = "Trackball (R)";
+        size = <150>;
+        x = <1290>;
+        y = <430>;
+        linked-device-identifiers = "tsplit";
+        linked-subsystems = "cormoran_rip";
+    };
+
+    /* 旋钮：数组顺序必须与 ZMK 的 encoder 索引一致。
+     * paw.dtsi 里 sensors = <&left_encoder &right_encoder>，
+     * 所以索引 0 = 左旋钮，1 = 右旋钮。 */
+    encoders_layout: encoders_layout {
+        compatible = "cormoran,physical-layout-rotary-encoders";
+        display-name = "Rotary Encoders";
+        encoders = <&encoder_layout_left &encoder_layout_right>;
+    };
+
+    encoder_layout_left: encoder_layout_left {
+        compatible = "cormoran,physical-layout-rotary-encoder";
+        size = <110>;
+        x = <380>;
+        y = <450>;
+    };
+
+    encoder_layout_right: encoder_layout_right {
+        compatible = "cormoran,physical-layout-rotary-encoder";
+        size = <110>;
+        x = <1110>;
+        y = <450>;
+    };
+};

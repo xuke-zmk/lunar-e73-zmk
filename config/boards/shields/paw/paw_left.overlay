@@ -98,8 +98,54 @@ lpm_view_spi: &spi3 {
     cs-gpios = <&gpio1 14 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
 };
 
+/* ---- DYA Studio: 中央侧（本半）轨迹球的 processor --------------------------
+ * 左半自己的 PAW3222 走 trackball_listener 这条路径，processor 挂在这里。
+ * 右半构建不会引用鼠标/滚动这两个默认 processor 节点，
+ * 模块里它们是 /omit-if-no-ref/ 的，会被整个丢掉（省 RAM、也不会有重名 label）。
+ */
+&trackball_listener {
+    input-processors = <&mouse_runtime_input_processor>;
+};
+
+/* ---- DYA Studio: 非中央侧（右半）的轨迹球经 split 送来，在这里挂 processor ----
+ * 右半的 PAW3222 是通过 &pmw_split { device = <&trackball>; } 直接把
+ * 传感器事件转发到中央侧的，绕过了 input-listener，所以在右半的
+ * trackball_listener 上挂 processor 对这条流不生效。
+ * 要让 DYA Studio 能调右半轨迹球，必须在中央侧的 pmw_listener 上挂。
+ *
+ * 注意：这里刻意用独立的 processor 节点（而不是共用
+ * mouse_runtime_input_processor），避免两条事件流共用同一份
+ * scale/inertia/axis-snap 状态，也让 Studio 里两个 processor 能分别调。
+ *
+ * processor-label 在 binding 里是 **required**（zmk,input-processor-runtime），
+ * 且类型说明写着 "max 8 chars for BLE compatibility"。
+ * 这里取 6 个字符 tsplit，避免 8 字符是否含结尾符 NUL 的歧义。
+ */
+/ {
+    trackball_split_runtime_input_processor: trackball_split_runtime_input_processor {
+        compatible = "zmk,input-processor-runtime";
+        processor-label = "tsplit";
+        type = <INPUT_EV_REL>;
+        x-codes = <INPUT_REL_X>;
+        y-codes = <INPUT_REL_Y>;
+        scale-multiplier = <1>;
+        scale-divisor = <1>;
+        rotation-degrees = <0>;
+        track-remainders;
+
+        /* 与模块自带的默认节点保持一致，这样 temp-layer（用轨迹球自动切层）
+         * 在 DYA Studio 里打开时行为和 mouse_runtime_input_processor 一样 */
+        temp-layer-transparent-behavior = <&trans>;
+        temp-layer-kp-behavior = <&kp>;
+        temp-layer-keep-keycodes = <LEFT_CONTROL LEFT_SHIFT LEFT_ALT LEFT_GUI RIGHT_CONTROL RIGHT_SHIFT RIGHT_ALT RIGHT_GUI>;
+
+        #input-processor-cells = <0>;
+    };
+};
+
 &pmw_listener {
     status = "okay";
+    input-processors = <&trackball_split_runtime_input_processor>;
 };
 
 &left_listener {

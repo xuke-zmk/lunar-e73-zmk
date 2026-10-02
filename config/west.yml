@@ -1,16 +1,125 @@
 manifest:
   remotes:
-    - name: zmkfirmware
-      url-base: https://github.com/zmkfirmware
+    - name: cormoran
+      url-base: https://github.com/cormoran
     - name: sekigon-gonnoc
       url-base: https://github.com/sekigon-gonnoc
+
   projects:
+    # ---------------------------------------------------------------------
+    # DYA Studio ベースライン: ZMK / Zephyr を cormoran の fork に切り替える
+    # 参考: https://studio.dya.cormoran.works/developer-guide/level-2
+    # ---------------------------------------------------------------------
     - name: zmk
-      remote: zmkfirmware
-      revision: main
-      import: app/west.yml
+      remote: cormoran
+      revision: main+dya
+      import:
+        file: app/west.yml
+    - name: zephyr
+      remote: cormoran
+      revision: v4.1.0+zmk-fixes+nrf-half-duplex-uart
+      clone-depth: 1
+      import:
+        name-blocklist:
+          - ci-tools
+          - hal_altera
+          - hal_cypress
+          - hal_infineon
+          - hal_microchip
+          - hal_nxp
+          - hal_openisa
+          - hal_xtensa
+          - hal_st
+          - hal_ti
+          - loramac-node
+          - mcuboot
+          - mcumgr
+          - net-tools
+          - openthread
+          - edtt
+          - trusted-firmware-m
+
+    # ---------------------------------------------------------------------
+    # このキーボード固有のサードパーティドライバ (PAW3222 トラックボール)
+    # ---------------------------------------------------------------------
     - name: zmk-driver-paw3222
       remote: sekigon-gonnoc
       revision: main
+
+    # ---------------------------------------------------------------------
+    # DYA Studio Level 2: コアモジュール (他の機能モジュールが依存する)
+    # ---------------------------------------------------------------------
+    - name: zmk-feature-custom-settings
+      remote: cormoran
+      revision: main
+    - name: zmk-feature-fast-keymap
+      remote: cormoran
+      revision: main
+
+    # --- Keymap / Macro / Combo ------------------------------------------
+    - name: zmk-feature-runtime-macro
+      remote: cormoran
+      revision: main
+    - name: zmk-feature-runtime-combo
+      remote: cormoran
+      revision: main
+    - name: zmk-feature-input-stream
+      remote: cormoran
+      revision: main
+    - name: zmk-feature-module-physical-layout
+      remote: cormoran
+      revision: main
+
+    # --- Trackball (runtime input processor) -----------------------------
+    # PMW3610 専用の zmk-driver-pmw3610-with-custom-studio-rpc は入れない。
+    # このキーボードのセンサは PAW3222 なので CPI 等の設定 UI は使えないが、
+    # runtime input processor (感度・レイヤー・スクロール) はセンサ非依存で動く。
+    - name: zmk-module-runtime-input-processor
+      remote: cormoran
+      revision: main
+
+    # --- Connection ------------------------------------------------------
+    - name: zmk-module-ble-management
+      remote: cormoran
+      revision: main
+    - name: zmk-feature-default-layer
+      remote: cormoran
+      revision: codex/custom-rpc-rewrite # 注意: main ではない
+    - name: zmk-feature-os-detection
+      remote: cormoran
+      revision: main
+
+    # --- Settings --------------------------------------------------------
+    - name: zmk-module-settings-rpc
+      remote: cormoran
+      revision: main
+
+    # --- Diagnostics -----------------------------------------------------
+    - name: zmk-feature-device-info
+      remote: cormoran
+      revision: main
+    - name: zmk-feature-watchdog
+      remote: cormoran
+      revision: main
+    - name: zmk-module-devtool
+      remote: cormoran
+      revision: main
+    - name: zmk-feature-kscan-diagnostics
+      remote: cormoran
+      revision: main
+
+    # --- Diagnostics (可选, 默认关闭) -------------------------------------
+    # zmk-feature-zephyr-setting-expose：让网页列出/读取/写入/删除设备上的
+    # Zephyr settings。这是破坏性能力，而且你保留了
+    # CONFIG_ZMK_STUDIO_LOCKING=n（任何能连上的网页都算已解锁），
+    # 两者叠加 = 任何网页都能清掉你的设置。所以默认不装。
+    # 想要这一页：取消下面三行注释，并把 config/paw.conf 里
+    # CONFIG_ZMK_SETTING_EXPOSE 那一行也放开。
+    # 注意：装了之后 ZMK_SETTING_EXPOSE_SPLIT 默认 y，会在两半都编译 relay 代码
+    # 并 select NANOPB（即使 ZMK_SETTING_EXPOSE=n），所以要明确取舍。
+    # - name: zmk-feature-zephyr-setting-expose
+    #   remote: cormoran
+    #   revision: main
+
   self:
     path: config
