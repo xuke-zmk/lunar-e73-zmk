@@ -73,14 +73,26 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p out
-          for f in build/zephyr/zmk.uf2 build/zephyr/zephyr.elf build/zephyr/zephyr.map build/zephyr/zephyr.bin; do
-            if [ -f "$f" ]; then
-              cp "$f" "out/${{ matrix.shield }}-$(basename "$f")"
-            else
-              echo "（没有 $f，跳过）"
-            fi
+          echo "===== build/ 目录里到底有哪些产物 ====="
+          ls -la build/zephyr 2>/dev/null | head -60 || true
+          echo "===== 全盘搜 .elf / .map ====="
+          find build -type f \( -name '*.elf' -o -name '*.map' \) -print 2>/dev/null || true
+          echo "===== 复制 ====="
+          # 不硬编码路径：ZMK 会把产物重命名（zmk.uf2 / zmk.bin / zmk.elf …），
+          # zephyr.elf 这个名字不一定存在，所以用 find 抓。
+          find build -type f \( -name '*.elf' -o -name '*.map' -o -name '*.bin' \) -print 2>/dev/null | while read -r f; do
+            cp "$f" "out/${{ matrix.shield }}-$(basename "$f")"
           done
+          if [ -f build/zephyr/zmk.uf2 ]; then
+            cp build/zephyr/zmk.uf2 "out/${{ matrix.shield }}-zmk.uf2"
+          fi
+          echo "===== out/ 内容 ====="
           ls -l out
+          # 一个 ELF 或 MAP 都没有的话直接失败，免得又拿到一个空壳产物
+          if ! ls out/*.elf out/*.map >/dev/null 2>&1; then
+            echo "::error::既没有 ELF 也没有 MAP，符号无从解析。请把上面的目录列表发给我。"
+            exit 1
+          fi
 
       - name: Archive (${{ matrix.shield }})
         uses: actions/upload-artifact@v4
