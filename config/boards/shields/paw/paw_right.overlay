@@ -123,8 +123,25 @@ lpm_view_spi: &spi3 {
 / {
     vbatt: vbatt {
         compatible = "zmk,battery-voltage-divider";
-        io-channels = <&adc 12>;
+        io-channels = <&adc 8>;
         output-ohms = <2000000>;
-        full-ohms = <2809000>;
+        full-ohms = <2806000>;
     };
 };
+
+/* battery-selftest (VDD):
+ * 自检版：io-channels = <&adc 8>
+ * 驱动里的算法是  input_positive = AnalogInput0 + N，
+ * 而 nRF52840 的 PSELP 编号是 1..8=AIN0..AIN7、9=VDD、10=VDDHDIV5，
+ * 所以 N=8 -> PSELP 9 -> 测的是芯片自己的 VDD（约 3.3V）。
+ *
+ * 按驱动的换算 3300mV x full(2806000)/output(2000000) = 4630mV > 4200mV，
+ * 应该显示 100%。
+ *
+ * 判读：
+ *   显示 100%（或一个明显偏高的稳定值）
+ *       -> ADC 通路本身正常，问题纯粹在“选了哪个模拟脚”
+ *   仍然 0%
+ *       -> 整个 ADC 通路有问题（SAADC 初始化/配置失败），
+ *          跟引脚无关，需要换思路
+ */
