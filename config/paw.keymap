@@ -79,7 +79,7 @@
          *   拇指键在这里兼作"通往其它层的入口"
          * ------------------------------------------------------------------ */
         raise_layer {
-            display-name = "Raise 符号";
+            display-name = "Raise";
 
             bindings = <
 &kp EXCL   &kp AT    &kp HASH  &kp DLLR  &kp PRCNT  &kp CARET       &kp AMPS   &kp STAR   &kp LPAR   &kp RPAR    &kp TILDE  &kp BSPC
@@ -97,7 +97,7 @@
          * 第 3 层：导航层
          * ------------------------------------------------------------------ */
         nav_layer {
-            display-name = "Nav 导航";
+            display-name = "Nav";
 
             bindings = <
 &kp TAB    &kp HOME  &kp UP    &kp END    &kp PG_UP  &kp DEL         &trans  &trans  &trans  &trans  &trans  &kp BSPC
@@ -115,7 +115,7 @@
          * 第 4 层：功能键 + 媒体
          * ------------------------------------------------------------------ */
         fn_layer {
-            display-name = "Fn 功能键";
+            display-name = "Fn";
 
             bindings = <
 &kp F1     &kp F2    &kp F3    &kp F4    &kp F5     &kp F6          &kp F7  &kp F8  &kp F9   &kp F10  &kp F11  &kp F12
@@ -133,7 +133,7 @@
          * 第 5 层：数字键盘（右手当小键盘用）
          * ------------------------------------------------------------------ */
         num_layer {
-            display-name = "Num 数字";
+            display-name = "Num";
 
             bindings = <
 &trans     &trans    &trans    &trans    &trans     &trans          &kp N7  &kp N8  &kp N9  &kp SLASH  &kp STAR   &kp BSPC
@@ -151,7 +151,7 @@
          * 第 6 层：鼠标（轨迹球的移动也走这条流）
          * ------------------------------------------------------------------ */
         mouse_layer {
-            display-name = "Mouse 鼠标";
+            display-name = "Mouse";
 
             bindings = <
 &trans     &trans    &trans    &trans    &trans     &trans          &trans      &mmv MOVE_UP     &trans        &msc SCRL_UP    &trans  &trans
@@ -169,7 +169,7 @@
          * 第 7 层：系统层（蓝牙档位 / 输出切换 / RGB / 重启）
          * ------------------------------------------------------------------ */
         sys_layer {
-            display-name = "System 系统";
+            display-name = "System";
 
             bindings = <
 &studio_unlock  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_CLR      &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &trans  &trans  &kp BSPC
