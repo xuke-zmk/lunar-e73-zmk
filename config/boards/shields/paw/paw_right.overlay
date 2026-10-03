@@ -120,11 +120,24 @@ lpm_view_spi: &spi3 {
     status = "okay";
 };
 
-/ {
-    vbatt: vbatt {
-        compatible = "zmk,battery-voltage-divider";
-        io-channels = <&adc 12>;
-        output-ohms = <2000000>;
-        full-ohms = <2809000>;
-    };
-};
+/* battery-v2-fix:
+ * 删掉了原来那段 vbatt 覆盖（原来是照 nice!nano v1 抄的）。
+ *
+ * 这块板子的硬件是：SW_OUT --[R2 806k]-- battery_adc_pin --[R3 2M]-- GND
+ * 也就是说电池电压确实经过外部分压。但原来写的是
+ *     io-channels = <&adc 12>;
+ * 而 12 是芯片【内部】的 VDDH/5 通道，并不是那个分压点 ——
+ * 等于在读芯片自己的供电电压，再套一层 x1.4 的系数，
+ * 算出来的电池电压只有真实值的约 1/3.5，所以百分比恒为 0。
+ *
+ * nice!nano v2 的板级定义自带正确的电池测量：
+ *     vbatt { compatible = zmk,battery-nrf-vddh; };
+ * 即直接测 VDDH（这块板子上 VDDH 就是电池电压，所以 reg0 也是开着的），
+ * 不需要外部分压电阻、也不占用 SAADC。删掉覆盖后由板级定义接管。
+ *
+ * 备选方案（如果实测 VDDH 不等于电池电压）：改回 voltage-divider 并把
+ * io-channels 换成 battery_adc_pin 实际所接引脚对应的 AIN 号：
+ *     AIN0=P0.02 AIN1=P0.03 AIN2=P0.04 AIN3=P0.05
+ *     AIN4=P0.28 AIN5=P0.29 AIN6=P0.30 AIN7=P0.31
+ * 分压参数保持 output-ohms=<2000000>、full-ohms=<2806000>（R3 与 R2+R3）。
+ */
