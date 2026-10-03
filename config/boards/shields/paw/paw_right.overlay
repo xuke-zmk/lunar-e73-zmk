@@ -120,11 +120,34 @@ lpm_view_spi: &spi3 {
     status = "okay";
 };
 
+/* battery-fix (AIN2):
+ * 恢复外部分压测量，并把通道改成正确的 AIN2。
+ *
+ * 硬件（见原理图）：SW_OUT --[R2 806k]-- battery_adc_pin --[R3 2M]-- GND
+ *   分压比 = R3/(R2+R3) = 2000000/2806000 = 0.7126
+ *   3.78V 电池 -> 分压点约 2.69V
+ *   所以 output-ohms 必须是 R3，full-ohms 必须是 R2+R3：
+ *       output-ohms = <2000000>;
+ *       full-ohms   = <2806000>;
+ *
+ * 之前的两处错误：
+ *   1) io-channels = <&adc 12> —— 12 是芯片【内部】的 VDDH/5 通道。
+ *      这块板子的 VDDH 是稳压过的 ~3.3V，代入 ZMK 的百分比公式
+ *      (mv*2/15-459) 得到负数 -> 百分比恒为 0。
+ *   2) 曾改成 zmk,battery-nrf-vddh（直接测 VDDH）—— 同样是测错了地方。
+ *
+ * 现在改成 AIN2 = P0.04（nice!nano v1 的电池脚；这块板子的分压电阻值
+ * 与 v1 完全一致，说明是照 v1 的电路画的）。
+ *
+ * 若读数仍不合理，把 &adc 2 换成 &adc 3（AIN3 = P0.05），
+ * 它是这块板子上唯一另一个空闲的模拟脚。
+ */
+
 / {
     vbatt: vbatt {
-        compatible = "zmk,battery-voltage-divider";
-        io-channels = <&adc 12>;
+        compatible = zmk,battery-voltage-divider;
+        io-channels = <&adc 2>;
         output-ohms = <2000000>;
-        full-ohms = <2809000>;
+        full-ohms = <2806000>;
     };
 };
