@@ -1,8 +1,29 @@
 # This file generates the GitHub Actions matrix
+
 include:
+
   - board: nice_nano//zmk
+
     shield: paw_left
+
     snippet: studio-rpc-usb-uart nrf52840-nosd
+
   - board: nice_nano//zmk
+
     shield: paw_right
+
+    snippet: nrf52840-nosd
+
+  # ZMK 官方的 settings_reset 盾：刷上它会把 flash 里的**持久化设置全部抹掉**。
+  #
+  # 为什么需要它：Watchdog 的事件表证明设置是存在 flash 里的——
+  # 事件 ID 从 1-16 接着变成 17-27，刷固件并不会清空。
+  # 如果里面存着满掉/损坏的状态（比如 16/16 满的事件存储），
+  # 那换哪个固件都可能崩，这能解释"刷了还是一样"。
+  #
+  # 用法：刷 settings_reset 那个 .uf2 -> 它会清空设置并闪烁提示 -> 再刷回正常固件。
+  - board: nice_nano//zmk
+
+    shield: settings_reset
+
     snippet: nrf52840-nosd

@@ -1,0 +1,89 @@
+# ===========================================================================
+# 带 ELF 的构建 —— 用来把崩溃地址翻译成代码位置
+#
+# 背景：Watchdog 事件表记下了
+#     内核 Oops (3)  PC 0x0002fede  LR 0x0002fecf  线程 ?
+# Zephyr 的 fatal reason 3 就是 K_ERR_KERNEL_OOPS（k_oops / 断言失败），
+# 而且 PC/LR 每次都一模一样 —— 确定性的崩溃。但光有地址不知道是哪一行，
+# DYA Studio 界面上那个「上传 ELF 以解析 PC/LR 符号」按钮就需要 ELF。
+#
+# ZMK 官方的复用工作流（build-user-config.yml）只归档 zmk.uf2，不产出 ELF，
+# 所以这里自己构建一次：**同一次构建同时产出 .uf2 和 zephyr.elf**，
+# 这样地址和你刷进去的固件严格对应（不用担心两次构建之间代码布局漂移）。
+#
+# 构建命令和官方复用工作流完全一致（见 build-user-config.yml 第 150 行）：
+#     west build -s zmk/app -d <dir> -b <board> -S "<snippet>" -- \
+#       -DZMK_CONFIG=<workspace>/config -DSHIELD="<shield>"
+# 其中 snippet 是**整体一个字符串**传给 -S 的（含空格），别拆开。
+#
+# 用法：Actions 里手动跑（workflow_dispatch），或推送本文件所在的分支。
+# 产物 elf-paw_left / elf-paw_right 里各有：
+#     <shield>-nice_nano__zmk-zmk.uf2   <- 刷这个
+#     <shield>-zephyr.elf               <- 上传到 DYA Studio 解析地址
+#     <shield>-zephyr.map               <- 链接映射表（备用，纯文本，按地址查符号）
+# ===========================================================================
+name: Build with ELF
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/build-elf.yml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-arm:stable
+    name: Build (with ELF)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - board: nice_nano//zmk
+            shield: paw_left
+            snippet: studio-rpc-usb-uart nrf52840-nosd
+          - board: nice_nano//zmk
+            shield: paw_right
+            snippet: nrf52840-nosd
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # 容器里跑 git 时 workspace 的属主可能不匹配，会导致 west/git 拒绝操作
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: West Init
+        run: west init -l config
+
+      - name: West Update
+        run: west update --fetch-opt=--filter=tree:0
+
+      - name: West Zephyr export
+        run: west zephyr-export
+
+      - name: West Build (${{ matrix.shield }})
+        run: |
+          west build -s zmk/app -d build -p always -b "${{ matrix.board }}" \
+            -S "${{ matrix.snippet }}" -- \
+            -DZMK_CONFIG="$GITHUB_WORKSPACE/config" \
+            -DSHIELD="${{ matrix.shield }}"
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p out
+          for f in build/zephyr/zmk.uf2 build/zephyr/zephyr.elf build/zephyr/zephyr.map build/zephyr/zephyr.bin; do
+            if [ -f "$f" ]; then
+              cp "$f" "out/${{ matrix.shield }}-$(basename "$f")"
+            else
+              echo "（没有 $f，跳过）"
+            fi
+          done
+          ls -l out
+
+      - name: Archive (${{ matrix.shield }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: elf-${{ matrix.shield }}
+          path: out
