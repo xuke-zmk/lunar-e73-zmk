@@ -115,3 +115,14 @@
         status = "disabled";
     };
 };
+
+/* ---- 禁用 nice!nano 板级定义里的 EXT_POWER（见 config/paw.conf 的说明）------
+ * 该节点在板级 overlay 里写作 `EXT_POWER { ... }`，**没有 label**，
+ * 所以只能用节点路径引用，不能用 &EXT_POWER。
+ * 放在 paw.dtsi 里，左右两半都生效 —— 两半的 P0.13 都是轨迹球 NCS。
+ * 与 CONFIG_ZMK_EXT_POWER=n 互为保险：那条让驱动不被编译，
+ * 这条让节点显式消失（也把原因记录在 devicetree 里）。
+ */
+&{/EXT_POWER} {
+    status = "disabled";
+};
