@@ -140,7 +140,7 @@
             sensor-bindings =
                 <&inc_dec_kp RGB_HUI RGB_HUD>,
                 <&inc_dec_kp RGB_BRI RGB_BRD>;
-        }
+        };
 };
 
 };
