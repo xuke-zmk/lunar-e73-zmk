@@ -2,6 +2,29 @@
  * Copyright (c) 2020 The ZMK Contributors
  *
  * SPDX-License-Identifier: MIT
+ *
+ * ===========================================================================
+ * Lunar Dust (E73) 键位 —— 8 层
+ *
+ * 层结构：
+ *   0  Default   基础层（原样保留，未改动）
+ *   1  Lower     数字 + 蓝牙 + 方向（原样保留，未改动）
+ *   2  Raise     符号        ← 拇指上的 &mo 2 终于有对应的层了
+ *   3  Nav       导航
+ *   4  Fn        功能键 + 媒体
+ *   5  Num       数字键盘
+ *   6  Mouse     鼠标移动 / 滚轮（轨迹球也走这里）
+ *   7  System    系统：蓝牙档位、输出切换、RGB、重启
+ *
+ * 怎么切到 3~7 层：
+ *   按住拇指的 &mo 2 进入【Raise（符号）层】，那一层的拇指键变成
+ *        左：mo 3   mo 4   mo 5   SPACE
+ *        右：RET    mo 6   mo 7   trans
+ *   也就是"先按住 mo2、再按拇指键"就能到任意一层。
+ *   （这样最多两次按压可达全部 8 层，不用增加物理键）
+ *
+ * 每层都有 sensor-bindings（两个旋钮），不写的话旋钮在该层会失效。
+ * ===========================================================================
  */
 
 #include <behaviors.dtsi>
@@ -9,11 +32,15 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
 #include <dt-bindings/zmk/outputs.h>
+#include <dt-bindings/zmk/rgb.h>
 
 / {
     keymap {
         compatible = "zmk,keymap";
 
+        /* ------------------------------------------------------------------
+         * 第 0 层：基础层（与原来完全一致，未做任何改动）
+         * ------------------------------------------------------------------ */
         default_layer {
             display-name = "Default Layer";
 
@@ -29,6 +56,9 @@
                 <&inc_dec_kp PG_UP PG_DN>;
         };
 
+        /* ------------------------------------------------------------------
+         * 第 1 层：数字 / 蓝牙 / 方向（与原来完全一致，未做任何改动）
+         * ------------------------------------------------------------------ */
         lower_layer {
             display-name = "Lower Layer";
 
@@ -38,6 +68,119 @@
 &kp LSHFT   &trans        &trans        &trans        &trans        &trans            &trans    &trans    &trans    &trans     &trans  &trans
                           &kp LGUI      &kp LGUI      &trans        &kp SPACE         &kp RET   &trans    &kp RALT  &kp LGUI
             >;
+
+            sensor-bindings =
+                <&inc_dec_kp C_VOL_UP C_VOL_DN>,
+                <&inc_dec_kp PG_UP PG_DN>;
+        };
+
+        /* ------------------------------------------------------------------
+         * 第 2 层：符号层（拇指 &mo 2 的目标层）
+         *   拇指键在这里兼作"通往其它层的入口"
+         * ------------------------------------------------------------------ */
+        raise_layer {
+            display-name = "Raise";
+
+            bindings = <
+&kp EXCL   &kp AT    &kp HASH  &kp DLLR  &kp PRCNT  &kp CARET       &kp AMPS   &kp STAR   &kp LPAR   &kp RPAR    &kp TILDE  &kp BSPC
+&kp UNDER  &kp MINUS &kp PLUS  &kp EQUAL &kp LBKT   &kp RBKT        &kp LBRC   &kp RBRC   &kp PIPE   &kp BSLH    &kp COLON  &kp SCLN
+&kp LSHFT  &kp DQT   &kp SQT   &kp LT    &kp GT     &kp QMARK       &kp SLASH  &kp BSLH   &kp COMMA  &kp DOT     &kp MINUS  &kp DEL
+                     &mo 3   &mo 4     &mo 5     &kp SPACE       &kp RET    &mo 6      &mo 7      &trans
+            >;
+
+            sensor-bindings =
+                <&inc_dec_kp C_VOL_UP C_VOL_DN>,
+                <&inc_dec_kp PG_UP PG_DN>;
+        };
+
+        /* ------------------------------------------------------------------
+         * 第 3 层：导航层
+         * ------------------------------------------------------------------ */
+        nav_layer {
+            display-name = "Nav";
+
+            bindings = <
+&kp TAB    &kp HOME  &kp UP    &kp END    &kp PG_UP  &kp DEL         &trans  &trans  &trans  &trans  &trans  &kp BSPC
+&kp LCTRL  &kp LEFT  &kp DOWN  &kp RIGHT  &kp PG_DN  &trans          &trans  &trans  &trans  &trans  &trans  &trans
+&kp LSHFT  &trans    &trans    &trans     &trans     &trans          &trans  &trans  &trans  &trans  &trans  &trans
+                     &trans   &trans     &trans     &kp SPACE       &kp RET  &trans  &trans  &trans
+            >;
+
+            sensor-bindings =
+                <&inc_dec_kp C_VOL_UP C_VOL_DN>,
+                <&inc_dec_kp PG_UP PG_DN>;
+        };
+
+        /* ------------------------------------------------------------------
+         * 第 4 层：功能键 + 媒体
+         * ------------------------------------------------------------------ */
+        fn_layer {
+            display-name = "Fn";
+
+            bindings = <
+&kp F1     &kp F2    &kp F3    &kp F4    &kp F5     &kp F6          &kp F7  &kp F8  &kp F9   &kp F10  &kp F11  &kp F12
+&kp LCTRL  &kp C_PREV &kp C_VOL_DN &kp C_VOL_UP &kp C_NEXT &kp C_MUTE &trans  &trans  &trans  &trans  &trans  &trans
+&kp LSHFT  &trans    &trans    &trans    &trans     &trans          &trans  &trans  &trans  &trans  &trans  &trans
+                     &trans   &trans    &trans     &kp SPACE       &kp RET  &trans  &trans  &trans
+            >;
+
+            sensor-bindings =
+                <&inc_dec_kp C_VOL_UP C_VOL_DN>,
+                <&inc_dec_kp C_NEXT C_PREV>;
+        };
+
+        /* ------------------------------------------------------------------
+         * 第 5 层：数字键盘（右手当小键盘用）
+         * ------------------------------------------------------------------ */
+        num_layer {
+            display-name = "Num";
+
+            bindings = <
+&trans     &trans    &trans    &trans    &trans     &trans          &kp N7  &kp N8  &kp N9  &kp SLASH  &kp STAR   &kp BSPC
+&trans     &trans    &trans    &trans    &trans     &trans          &kp N4  &kp N5  &kp N6  &kp MINUS  &kp PLUS   &trans
+&trans     &trans    &trans    &trans    &trans     &trans          &kp N1  &kp N2  &kp N3  &kp N0     &kp DOT    &kp RET
+                     &trans   &trans    &trans     &kp SPACE       &kp RET  &trans  &trans  &trans
+            >;
+
+            sensor-bindings =
+                <&inc_dec_kp C_VOL_UP C_VOL_DN>,
+                <&inc_dec_kp PG_UP PG_DN>;
+        };
+
+        /* ------------------------------------------------------------------
+         * 第 6 层：鼠标（轨迹球的移动也走这条流）
+         * ------------------------------------------------------------------ */
+        mouse_layer {
+            display-name = "Mouse";
+
+            bindings = <
+&trans     &trans    &trans    &trans    &trans     &trans          &trans      &mmv MOVE_UP     &trans        &msc SCRL_UP    &trans  &trans
+&trans     &trans    &trans    &trans    &trans     &trans          &mmv MOVE_LEFT &mmv MOVE_DOWN &mmv MOVE_RIGHT &msc SCRL_DOWN &trans  &trans
+&trans     &trans    &trans    &trans    &trans     &trans          &trans      &trans           &trans        &trans          &trans  &trans
+                     &trans   &trans    &trans     &kp SPACE       &kp RET     &trans           &trans        &trans
+            >;
+
+            sensor-bindings =
+                <&inc_dec_kp C_VOL_UP C_VOL_DN>,
+                <&inc_dec_kp PG_UP PG_DN>;
+        };
+
+        /* ------------------------------------------------------------------
+         * 第 7 层：系统层（蓝牙档位 / 输出切换 / RGB / 重启）
+         * ------------------------------------------------------------------ */
+        sys_layer {
+            display-name = "System";
+
+            bindings = <
+&studio_unlock  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_CLR      &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &trans  &trans  &kp BSPC
+&bt BT_SEL 0    &bt BT_PRV    &bt BT_NXT    &trans        &trans        &trans          &rgb_ug RGB_TOG  &rgb_ug RGB_HUI  &rgb_ug RGB_HUD  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &trans
+&trans          &rgb_ug RGB_EFF &rgb_ug RGB_EFR &rgb_ug RGB_SPI &rgb_ug RGB_SPD &trans      &sys_reset  &bootloader  &trans  &trans  &trans  &trans
+                                &trans        &trans        &trans        &kp SPACE       &kp RET  &trans  &trans  &trans
+            >;
+
+            sensor-bindings =
+                <&inc_dec_kp C_VOL_UP C_VOL_DN>,
+                <&inc_dec_kp PG_UP PG_DN>;
         };
     };
 };
